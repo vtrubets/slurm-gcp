@@ -681,6 +681,8 @@ def install_suspend_progs():
 
 def install_slurm():
 
+    FNULL = open(os.devnull, 'w')
+
     SCHEDMD_URL = 'https://download.schedmd.com/slurm/'
     file = "slurm-%s.tar.bz2" % SLURM_VERSION
     urllib.urlretrieve(SCHEDMD_URL + file, '/tmp/' + file)
@@ -694,8 +696,12 @@ def install_slurm():
         os.makedirs('build')
     os.chdir('build')
     subprocess.call(['../configure', '--prefix=%s' % SLURM_PREFIX,
-                     '--sysconfdir=%s/slurm/current/etc' % APPS_DIR])
-    subprocess.call(['make', '-j', 'install'])
+                     '--sysconfdir=%s/slurm/current/etc' % APPS_DIR],
+                     stdout=FNULL)
+    subprocess.call(['make', '-j', 'install'], stdout=FNULL)
+    os.chdir('contribs')
+    subprocess.call(['make', '-j', 'install'], stdout=FNULL)
+    FNULL.close()
 
     subprocess.call(shlex.split("ln -s %s %s/slurm/current" % (SLURM_PREFIX, APPS_DIR)))
 
